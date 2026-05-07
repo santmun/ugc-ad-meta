@@ -1,0 +1,22 @@
+# User config — each user has their own
+config/user-config.json
+
+# Output of generated ads (large files)
+*.mp4
+!examples/*.mp4
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
