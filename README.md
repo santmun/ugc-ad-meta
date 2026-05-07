@@ -78,7 +78,17 @@ En Claude Code, di:
 
 > "haz un anuncio para meta"
 
-La primera vez correrá el setup wizard. Después solo te pide el TEMA.
+La primera vez te entrevistará con 14 preguntas (~3 min) para personalizar el skill. Después solo te pide el TEMA del anuncio.
+
+### 4. (opcional) Health check
+
+Antes de empezar, verifica que todo está bien:
+
+```bash
+cd ~/.claude/skills/ugc-ad-meta && python3 scripts/doctor.py
+```
+
+Te dice si falta higgsfield, ffmpeg, hyperframes, créditos, etc.
 
 ## Estructura del repo
 
@@ -97,8 +107,9 @@ ugc-ad-meta/
 │   ├── video-lipsync-template.md
 │   └── corrections-glossary.md
 ├── scripts/
-│   ├── setup_wizard.py
-│   ├── generate_ad.py
+│   ├── doctor.py                 # health check pre-flight
+│   ├── setup_wizard.py           # fallback CLI (sin agent)
+│   ├── generate_ad.py            # soporta --model kling3_0 | seedance_2_0
 │   ├── transcribe_correct.py
 │   ├── build_composition.py
 │   └── publish_to_meta.py        # opcional, sube a Meta Ads en PAUSED
@@ -132,6 +143,17 @@ Otras reglas que el skill respeta:
 - Kling 3.0 ocasionalmente devuelve **HTTP 502** si recibes muchos jobs en paralelo. El skill SIEMPRE corre secuencial con backoff.
 - El audio español de Kling es bueno pero NO perfecto. Para palabras críticas (marca, CTA), las reglas fonéticas las arreglan, pero verifica antes de publicar.
 - Whisper a veces transcribe mal. El skill aplica un glossary de correcciones automáticas, pero si tu marca es muy rara, agrégala a `extra_corrections` en el config.
+
+## Errores comunes y cómo resolverlos
+
+| Error | Causa | Fix |
+|---|---|---|
+| `HTTP 502` de Kling 3.0 | Rate limit (paralelo) | El skill ya corre secuencial. Si pasa, reintentar — usualmente sale al 2do intento |
+| Audio sale en español de España | Prompt de Kling no enfatizó LATAM | Re-generar — el template del skill ya enfatiza LATAM, pero ocasionalmente el modelo improvisa |
+| Lip-sync desfasado | Dialogue muy largo o palabras complejas | Acortar dialogue (~14-17 palabras) o reformular palabras difíciles ("necesitaba" → "tenía que") |
+| Captions con texto raro (`Cloud`, `orizontes`, etc.) | Whisper transcribió mal | El glossary ya corrige los más comunes. Si tu marca tiene palabras raras, agrégalas a `config.extra_corrections.captions` |
+| Modelo dice "dot com" en lugar de "punto com" | Dialogue escrito como `.com` | Editar dialogue a `punto com` (el skill ya lo hace automático con marcas configuradas) |
+| `meta` CLI no encontrado | No instalado o path | `pip install meta-ads` y agregar `~/.local/bin` a PATH |
 
 ## Roadmap (sugerencias)
 

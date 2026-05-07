@@ -15,6 +15,17 @@ triggers:
 
 Skill genérico para generar anuncios UGC en Meta Ads. Una persona realista habla a cámara como si grabara con su celular, en formato vertical 9:16, con lip-sync en español LATAM y subtítulos sincronizados.
 
+## Para empezar
+
+Si es tu primera vez, di:
+
+> *"haz un anuncio para meta de mi negocio"*
+
+El agent te entrevistará con 14 preguntas para personalizar el skill (marca, CTA, modelo, idioma, modelo de video, etc.). Después solo dirás el TEMA del anuncio y se genera todo.
+
+> ⚠️ **El agent hace las preguntas conversacionalmente** leyendo `workflow/00-first-time-setup.md`.
+> El archivo `scripts/setup_wizard.py` es solo un **fallback CLI** para uso sin agent — no lo ejecutes si tienes Claude Code activo.
+
 ## Filosofía
 
 > **Si nunca te ejecutaron antes, primero corre el setup wizard. Si ya estás configurado, lee `config/user-config.json` y pide solo el TEMA del anuncio. Aplica todas las reglas fonéticas y de tono automáticamente sin que el usuario tenga que recordarlas.**
@@ -62,15 +73,22 @@ Aplicar **automáticamente** el glossary de `prompts/corrections-glossary.md` pa
 
 Mostrar el guion completo en tabla. Esperar OK del usuario antes de gastar créditos en Kling. Esta pausa es OBLIGATORIA — los videos cuestan ~9 cr c/u y regenerar 6 = ~54 cr.
 
-### 4. Generar 6 videos con Kling 3.0
+### 4. Generar 6 videos — modelo configurable (Kling 3.0 o Seedance 2.0)
 
-Ejecutar `scripts/generate_ad.py` que usa el template de `prompts/video-lipsync-template.md`. SIEMPRE secuencial (no paralelo) con backoff — Kling tiene rate limits agresivos.
+Leer `config.video_model` para decidir cuál usar. Si es `"ask-each-time"`, preguntar al usuario antes de gastar.
+
+Ejecutar `scripts/generate_ad.py --model {kling3_0|seedance_2_0}` que usa el template de `prompts/video-lipsync-template.md`. SIEMPRE secuencial (no paralelo) con backoff.
+
+| Modelo | Costo/video | Costo/anuncio (6) | Duración soportada | Vibe |
+|---|---|---|---|---|
+| `kling3_0` (Kling 3.0) | ~9 cr | ~54 cr | 5 o 10s | Mejor lip-sync, audio claro, rate-limit estricto (HTTP 502 común si paralelo) |
+| `seedance_2_0` (Seedance 2.0) | ~22-27 cr | ~135-162 cr | entero (5, 6, 7…) | Audio más natural, más caro, mejor para storytelling |
 
 Para cada video:
 - aspect_ratio: 9:16
-- duration: 5
+- duration: 5 (o 6 si Seedance y se quiere más espacio para hablar)
 - image: UUID del modelo configurado en config
-- prompt: template con dialogue fonético + reglas LATAM + vibe configurado
+- prompt: template con dialogue fonético + reglas LATAM + vibe
 
 ### 5. Pausa de revisión visual
 

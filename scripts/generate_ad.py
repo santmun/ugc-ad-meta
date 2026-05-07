@@ -41,8 +41,16 @@ def build_prompt(dialogue: str, vibe: str, idioma_desc: str, extra: str = "") ->
     )
 
 
+SUPPORTED_VIDEO_MODELS = ("kling3_0", "seedance_2_0")
+
+
 def generate_scene(scene: dict, model_uuid: str, idioma_desc: str, out_path: Path,
+                   video_model: str = "kling3_0", duration: int = 5,
                    max_retries: int = 3) -> tuple[str, str]:
+    if video_model not in SUPPORTED_VIDEO_MODELS:
+        raise ValueError(
+            f"video_model must be one of {SUPPORTED_VIDEO_MODELS}, got {video_model}"
+        )
     n = scene["n"]
     prompt = build_prompt(
         scene["dialogue"],
@@ -51,13 +59,16 @@ def generate_scene(scene: dict, model_uuid: str, idioma_desc: str, out_path: Pat
         scene.get("extra", "")
     )
     cmd = [
-        "higgsfield", "generate", "create", "kling3_0",
+        "higgsfield", "generate", "create", video_model,
         "--prompt", prompt,
         "--aspect_ratio", "9:16",
-        "--duration", "5",
+        "--duration", str(duration),
         "--image", model_uuid,
         "--wait", "--json",
     ]
+    # Seedance has resolution param; Kling does not.
+    if video_model == "seedance_2_0":
+        cmd += ["--resolution", "720p"]
     for attempt in range(1, max_retries + 1):
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
@@ -90,6 +101,12 @@ def main():
     ap.add_argument("--config", required=True, help="user-config.json")
     ap.add_argument("--script", required=True, help="script.json with 6 scenes")
     ap.add_argument("--out", required=True, help="output directory for scene-{1..6}.mp4")
+    ap.add_argument("--model", default=None,
+                    choices=list(SUPPORTED_VIDEO_MODELS) + [None],
+                    help="Override video model (kling3_0 or seedance_2_0). "
+                         "If omitted, reads config.video_model.")
+    ap.add_argument("--duration", type=int, default=5,
+                    help="Seconds per scene (default 5)")
     args = ap.parse_args()
 
     config = json.loads(Path(args.config).read_text())
@@ -97,18 +114,26 @@ def main():
 
     model_uuid = config["modelo"]["uuid_higgsfield"]
     idioma_desc = IDIOMA_MAP.get(config["idioma"], IDIOMA_MAP["es-LATAM"])
+    video_model = args.model or config.get("video_model", "kling3_0")
+    if video_model == "ask-each-time":
+        print("ERROR: video_model is 'ask-each-time' in config. Pass --model "
+              "kling3_0 or --model seedance_2_0 explicitly.")
+        return 2
 
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Generating {len(script['scenes'])} scenes sequentially with Kling 3.0...\n",
-          flush=True)
+    print(f"Generating {len(script['scenes'])} scenes sequentially with "
+          f"{video_model} ({args.duration}s each)...\n", flush=True)
     results = []
     for s in script["scenes"]:
         n = s["n"]
         print(f"--- scene-{n} ---", flush=True)
         out_path = out_dir / f"scene-{n}.mp4"
-        status, info = generate_scene(s, model_uuid, idioma_desc, out_path)
+        status, info = generate_scene(
+            s, model_uuid, idioma_desc, out_path,
+            video_model=video_model, duration=args.duration,
+        )
         symbol = "✓" if status == "OK" else "✗"
         print(f"{symbol} scene-{n}: {info}\n", flush=True)
         results.append((n, status))

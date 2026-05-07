@@ -80,9 +80,31 @@ Hacer una por una, breve y conversacional. NO un cuestionario de 12 a la vez. Ac
 
 12. **Aviso Meta**: te recuerdo que cuando subas el anuncio en Meta Ads Manager debes marcar "AI-generated content" en el ad form (regla Meta 2024+). Confirmar que lo entendiste. ✓
 
-### Bloque 7 — Publicación a Meta (opcional)
+### Bloque 7 — Modelo de generación de video
 
-13. **¿Quieres también poder publicar los anuncios directo a Meta desde aquí?**
+13. **¿Qué modelo de generación de video prefieres usar como default?**
+
+    Hay 2 opciones, cada uno tiene sus pros:
+
+    - **`kling3_0` (Kling 3.0)** — RECOMENDADO para empezar
+       - ~9 créditos por video → ~54 cr por anuncio
+       - Mejor lip-sync, audio claro
+       - Mejor cuando dialogue tiene siglas/marcas raras (i a, Klaud)
+       - ⚠️ Rate-limit estricto, debe correr secuencial (devuelve HTTP 502 si paralelo)
+
+    - **`seedance_2_0` (Seedance 2.0)**
+       - ~22-27 créditos por video → ~135-162 cr por anuncio
+       - Audio más natural, más cinematic
+       - Mejor para tono storytelling / reflexivo
+       - Más caro (3x), úsalo cuando la calidad importa más que el costo
+
+    - **`ask-each-time`** — el skill te pregunta antes de cada anuncio cuál usar
+
+    Si no estás seguro, elige `kling3_0` (default recomendado).
+
+### Bloque 8 — Publicación a Meta (opcional)
+
+14. **¿Quieres también poder publicar los anuncios directo a Meta desde aquí?**
 
     Opciones:
     - **Sí, configurar Meta también**: instalo y configuro el Meta Ads CLI. Después de cada anuncio podrás decir "súbelo a Meta" y queda en estado PAUSED listo para revisar y publicar manualmente.
@@ -92,7 +114,7 @@ Hacer una por una, breve y conversacional. NO un cuestionario de 12 a la vez. Ac
 
     **Si responde "Sí, configurar Meta"**:
 
-    13a. **¿Ya tienes el Meta Ads CLI instalado y autenticado?** (`meta-ads` o `meta`)
+    14a. **¿Ya tienes el Meta Ads CLI instalado y autenticado?** (comando: `meta`, instalado vía `pip install meta-ads`)
        - Verificar con: `which meta && meta auth status`
 
        Si NO lo tiene instalado o no sabe qué es, **detener este bloque y mostrar al usuario**:
@@ -105,7 +127,7 @@ Hacer una por una, breve y conversacional. NO un cuestionario de 12 a la vez. Ac
 
        Setear `config.meta.enabled = false` y continuar con el setup.
 
-    13b. (Solo si Meta CLI está instalado) **Recolectar IDs**:
+    14b. (Solo si Meta CLI está instalado) **Recolectar IDs**:
        - Ad Account ID (`act_...`) — `meta accounts list`
        - Page ID (la página de Facebook que aparece como anunciante) — `meta pages list`
        - Default Pixel ID (opcional) — para tracking
@@ -113,7 +135,7 @@ Hacer una por una, breve y conversacional. NO un cuestionario de 12 a la vez. Ac
        - Default objetivo de campaña: `OUTCOME_LEADS` / `OUTCOME_TRAFFIC` / `OUTCOME_SALES` / `OUTCOME_ENGAGEMENT`
        - Default audiencia: usar la del config principal (LATAM 25-45) o custom (preguntar)
 
-    13c. Verificar permisos:
+    14c. Verificar permisos:
        ```bash
        meta accounts info <ad_account_id>
        ```
@@ -121,7 +143,21 @@ Hacer una por una, breve y conversacional. NO un cuestionario de 12 a la vez. Ac
 
     Si todo OK → setear `config.meta.enabled = true` y guardar IDs.
 
-### Bloque 7 — Output config.meta
+### Bloque 9 — Output config (incluye video_model + meta)
+
+Agregar a config:
+
+```json
+{
+  ...
+  "video_model": "kling3_0",
+  ...
+}
+```
+
+Valores válidos: `"kling3_0"`, `"seedance_2_0"`, `"ask-each-time"`.
+
+### Output config.meta (continuación)
 
 Si meta enabled, agregar al user-config.json:
 

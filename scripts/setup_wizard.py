@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Setup wizard interactivo — corre la primera vez para personalizar el skill.
+"""Setup wizard interactivo — FALLBACK CLI cuando NO se usa Claude Code.
 
-Uso:
+⚠️  Si tienes Claude Code activo, NO ejecutes este script. El AGENT hace las
+    preguntas de forma conversacional leyendo workflow/00-first-time-setup.md
+    y genera el config con los mismos campos.
+
+Este script es solo un fallback para usuarios sin agent (ej: terminal pura).
+
+Uso (solo si NO tienes agent):
   python3 setup_wizard.py --out config/user-config.json
-
-Este script guía al usuario por las 12 preguntas del setup. NO está diseñado para
-correr autónomo en un agent loop — es interactivo. Para uso en agent, el AGENT
-debe hacer las preguntas naturalmente (ver workflow/00-first-time-setup.md) y
-construir el JSON manualmente con los mismos campos.
 """
 import argparse
 import json
