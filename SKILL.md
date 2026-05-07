@@ -97,6 +97,22 @@ cd <project-dir> && npx hyperframes render -o anuncio-final.mp4
 
 Reportar path del MP4 + tamaño + duración.
 
+### 8. (Opcional) Publish a Meta Ads — solo si `config.meta.enabled == true`
+
+Si en el setup el usuario eligió configurar Meta también, ejecutar `workflow/06-publish-meta.md`:
+
+1. Cargar `config.meta` (page_id, ad_account_id, audience defaults, presupuesto)
+2. Preguntar overrides para ESTE anuncio (URL destino, presupuesto diario, objetivo)
+3. Ejecutar `scripts/publish_to_meta.py` que crea:
+   - Campaña en estado `PAUSED` con prefijo `[TEST]`
+   - Ad set con audiencia configurada
+   - Ad creative con el MP4 + flag `is_ai_powered: true` (AI disclosure de Meta)
+4. Reportar IDs creados y URL al ad en Meta Ads Manager
+5. Recordar al usuario: revisar y activar manualmente desde Ads Manager
+
+Si `config.meta.enabled == false`, **saltar este paso** y reportar al usuario:
+> Tu anuncio está listo. Súbelo manualmente a Meta Ads Manager cuando quieras.
+
 ---
 
 ## Reglas críticas (NUNCA romper)
@@ -123,6 +139,8 @@ Reportar path del MP4 + tamaño + duración.
 - `scripts/generate_ad.py` — orquestador end-to-end
 - `scripts/transcribe_correct.py` — Whisper + correcciones
 - `scripts/build_composition.py` — HyperFrames builder
+- `scripts/publish_to_meta.py` — opcional, sube a Meta Ads en PAUSED
+- `workflow/06-publish-meta.md` — flujo de publicación a Meta
 - `pool/` — 6 modelos starter (mujeres latinas) que el usuario puede usar tal cual
 - `examples/anuncio-demo.mp4` — anuncio de referencia
 
@@ -130,8 +148,15 @@ Reportar path del MP4 + tamaño + duración.
 
 ## Dependencias
 
+**Obligatorias** (para generar anuncios):
 - `higgsfield` CLI (`npm install -g @higgsfield/cli` + `higgsfield auth login`) — para Kling 3.0 + GPT Image 2
 - `hyperframes` CLI (vía `npx hyperframes`) — para composición + render
 - Python 3.10+ con `subprocess`, `urllib`, `json` (todos stdlib)
 - `jq` (para parsing CLI output)
 - `ffmpeg` (lo instala HyperFrames si falta)
+
+**Opcional** (solo si vas a publicar a Meta desde el skill):
+- `meta-ads` CLI (`pip install meta-ads` o `uv tool install meta-ads`) — para subir directo a Meta Ads
+- Credenciales Meta configuradas (access token, ad account ID, page ID)
+- Si NO sabes cómo instalar Meta CLI o configurarlo, hay guía completa aquí:
+  **https://www.skool.com/horizontes-ia-9992/meta-ads-y-claude-acaba-de-cambiar-todo-nuevo-video**

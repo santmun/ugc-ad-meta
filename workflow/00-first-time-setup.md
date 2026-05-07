@@ -80,6 +80,81 @@ Hacer una por una, breve y conversacional. NO un cuestionario de 12 a la vez. Ac
 
 12. **Aviso Meta**: te recuerdo que cuando subas el anuncio en Meta Ads Manager debes marcar "AI-generated content" en el ad form (regla Meta 2024+). Confirmar que lo entendiste. ✓
 
+### Bloque 7 — Publicación a Meta (opcional)
+
+13. **¿Quieres también poder publicar los anuncios directo a Meta desde aquí?**
+
+    Opciones:
+    - **Sí, configurar Meta también**: instalo y configuro el Meta Ads CLI. Después de cada anuncio podrás decir "súbelo a Meta" y queda en estado PAUSED listo para revisar y publicar manualmente.
+    - **No, solo generar los videos**: el skill solo te entrega el MP4. Tú lo subes manualmente a Meta Ads Manager. (Setup más rápido, sin dependencias extra.)
+
+    ---
+
+    **Si responde "Sí, configurar Meta"**:
+
+    13a. **¿Ya tienes el Meta Ads CLI instalado y autenticado?** (`meta-ads` o `meta`)
+       - Verificar con: `which meta && meta auth status`
+
+       Si NO lo tiene instalado o no sabe qué es, **detener este bloque y mostrar al usuario**:
+
+       > El Meta Ads CLI necesita instalación + token de Meta + permisos de tu Business Manager. La guía paso-a-paso completa está aquí:
+       >
+       > **https://www.skool.com/horizontes-ia-9992/meta-ads-y-claude-acaba-de-cambiar-todo-nuevo-video**
+       >
+       > Una vez que termines la instalación de allí, vuelve y corre el setup otra vez. Mientras tanto, configuro el skill SOLO para generar (puedes activar Meta después editando `config/user-config.json`).
+
+       Setear `config.meta.enabled = false` y continuar con el setup.
+
+    13b. (Solo si Meta CLI está instalado) **Recolectar IDs**:
+       - Ad Account ID (`act_...`) — `meta accounts list`
+       - Page ID (la página de Facebook que aparece como anunciante) — `meta pages list`
+       - Default Pixel ID (opcional) — para tracking
+       - Default presupuesto diario USD (ej: 10)
+       - Default objetivo de campaña: `OUTCOME_LEADS` / `OUTCOME_TRAFFIC` / `OUTCOME_SALES` / `OUTCOME_ENGAGEMENT`
+       - Default audiencia: usar la del config principal (LATAM 25-45) o custom (preguntar)
+
+    13c. Verificar permisos:
+       ```bash
+       meta accounts info <ad_account_id>
+       ```
+       Si devuelve error → mostrar mensaje y enlazar al post de Skool.
+
+    Si todo OK → setear `config.meta.enabled = true` y guardar IDs.
+
+### Bloque 7 — Output config.meta
+
+Si meta enabled, agregar al user-config.json:
+
+```json
+{
+  "meta": {
+    "enabled": true,
+    "ad_account_id": "act_...",
+    "page_id": "...",
+    "pixel_id": "..." | null,
+    "default_objective": "OUTCOME_LEADS",
+    "default_daily_budget_usd": 10,
+    "default_audience": {
+      "countries": ["MX", "CO", "AR", "PE", "CL"],
+      "age_min": 25,
+      "age_max": 45,
+      "languages": ["spa"]
+    }
+  }
+}
+```
+
+Si NO enabled:
+
+```json
+{
+  "meta": {
+    "enabled": false,
+    "_note": "Para activar, instala Meta CLI siguiendo https://www.skool.com/horizontes-ia-9992/meta-ads-y-claude-acaba-de-cambiar-todo-nuevo-video y luego edita este config a enabled:true con los IDs."
+  }
+}
+```
+
 ## Generar `config/user-config.json`
 
 ```json

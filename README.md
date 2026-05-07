@@ -29,8 +29,19 @@ Ver `examples/anuncio-demo.mp4` para ver el output esperado (30s, 1080×1920, 6 
    - Genera 6 videos con Kling 3.0 (lip-sync nativo, audio español LATAM)
    - Compone con HyperFrames + captions sincronizados (sin transitions, hard cuts)
    - Renderiza MP4 final 1080×1920
+   - **(opcional)** Si configuraste Meta CLI en setup, lo sube directo a Meta Ads en estado PAUSED listo para revisar
 
 **Costo por anuncio**: ~54 créditos Higgsfield (≈ $1-2 USD según plan).
+
+## Dos modos según tu setup
+
+| Modo | Qué obtienes | Setup requerido |
+|---|---|---|
+| **Solo generar** | MP4 final, lo subes manualmente a Meta | Higgsfield + HyperFrames |
+| **Generar + publicar** | MP4 + ad creado en Meta en PAUSED, listo para activar manual | + Meta Ads CLI configurado |
+
+En el setup wizard te pregunta cuál quieres. Si NO sabes cómo configurar Meta CLI, hay guía completa aquí:
+**https://www.skool.com/horizontes-ia-9992/meta-ads-y-claude-acaba-de-cambiar-todo-nuevo-video**
 
 ## Stack
 
@@ -89,7 +100,8 @@ ugc-ad-meta/
 │   ├── setup_wizard.py
 │   ├── generate_ad.py
 │   ├── transcribe_correct.py
-│   └── build_composition.py
+│   ├── build_composition.py
+│   └── publish_to_meta.py        # opcional, sube a Meta Ads en PAUSED
 ├── pool/                          # 6 modelos starter (mujeres latinas)
 └── examples/
     └── anuncio-demo.mp4
